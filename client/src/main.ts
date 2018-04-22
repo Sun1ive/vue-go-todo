@@ -6,7 +6,7 @@ import 'vuetify/dist/vuetify.css';
 Vue.config.productionTip = false;
 Vue.use(Vuetify, {
   theme: {
-    primary: '#ff995e', // #E53935
+    primary: '#ff995e',
   },
 });
 
