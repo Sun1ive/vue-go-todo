@@ -42,6 +42,18 @@ func SetHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
+// GetTodos hanlder
+func GetTodos(w http.ResponseWriter, r *http.Request) {
+	connect()
+	defer db.Close()
+
+	var todos []Todo
+	db.Find(&todos)
+	SetHeaders(w)
+
+	json.NewEncoder(w).Encode(todos)
+}
+
 func parseBody(w http.ResponseWriter, r *http.Request) {
 	// Check for request Body
 	if r.Body == nil {
@@ -69,6 +81,11 @@ func parseBody(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	InitialMigration()
+
 	http.HandleFunc("/", parseBody)
+	http.HandleFunc("/todos", GetTodos)
+
+	fmt.Println("Server is running at port 8081")
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
