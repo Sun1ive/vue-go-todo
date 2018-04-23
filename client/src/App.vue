@@ -12,11 +12,11 @@
         <v-flex xs10 sm6 lg4 class="text-xs-center">
           <v-form @submit.prevent="addTodo">
             <v-btn
+              :disabled="todo.length < 3"
               light
               color="primary"
               class="white--text"
               type="submit"
-              :disabled="todo.length < 3"
             >Add Todo</v-btn>
             <v-text-field
               v-model.lazy.trim="todo"
@@ -25,9 +25,6 @@
             />
           </v-form>
         </v-flex>
-      </v-layout>
-      <v-layout justify-center align-center>
-        <v-pagination :length="pLength" v-model="page" />
       </v-layout>
       <v-layout justify-center align-center>
         <v-flex xs10 sm6 lg4>
@@ -53,17 +50,30 @@
           <v-flex xs10 sm6 lg4>
             <v-card>
               <v-card-text>
-                <b class="mr-2">{{ i + 1}}.</b><strong>{{ item }}</strong>
+                <b class="mr-2">{{ i + 1 }}.</b><strong>{{ item }}</strong>
+                <v-btn
+                  flat
+                  fab
+                  color="red"
+                  float
+                  @click="removeTodo(i)"
+                >
+                  <v-icon>close</v-icon>
+                </v-btn>
               </v-card-text>
             </v-card>
           </v-flex>
         </v-layout>
       </transition-group>
+      <v-layout justify-center align-center>
+        <v-pagination :length="pLength" v-model="page" />
+      </v-layout>
     </v-container>
   </v-app>
 </template>
 
 <script lang="ts">
+/* eslint-disable import/no-unresolved */
 import Vue from 'vue';
 import api from './api/instance';
 
@@ -72,16 +82,9 @@ export default Vue.extend({
     todo: '' as string,
     todos: ['hellow', 'rowld', 'something', 'hellow1', 'rowld2'] as string[],
     page: 1 as number,
-    perPage: 10 as number,
+    perPage: 5 as number,
     query: '' as string,
   }),
-  methods: {
-    async addTodo() {
-      // api().post('/create', {});
-      this.todos.push(this.todo);
-      this.todo = '';
-    },
-  },
   computed: {
     pLength(): number {
       return Math.ceil(this.todos.length / this.perPage);
@@ -91,6 +94,16 @@ export default Vue.extend({
         return this.todos.filter(todo => todo.toLowerCase().includes(this.query.toLowerCase()));
       }
       return this.todos.slice().splice((this.perPage * this.page) - this.perPage, this.perPage);
+    },
+  },
+  methods: {
+    async addTodo() {
+      // api().post('/create', {});
+      this.todos.push(this.todo);
+      this.todo = '';
+    },
+    async removeTodo(index: number) {
+      this.todos.splice(index, 1);
     },
   },
 });

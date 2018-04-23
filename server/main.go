@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
-	"net/http"
+	"fmt"
 	"log"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -16,8 +17,13 @@ var err error
 // Todo Model struct
 type Todo struct {
 	gorm.Model
-	Todo  string `json:"todo"`
+	Title    string `json:"title"`
+	Category string `json:"category"`
+	IsDone   string `json:"isDone"`
 }
+
+// TODOS LIST
+var todos []Todo
 
 func setHeaders(res http.ResponseWriter) {
 	res.Header().Set("Content-Type", "application/json")
@@ -39,32 +45,45 @@ func InitialMigration() {
 }
 
 // GetTodos Endpoint
-func GetTodos(w http.ResponseWriter, r *http.Request)  {
+func GetTodos(w http.ResponseWriter, r *http.Request) {
 	connect()
 	defer db.Close()
 
-	var todos []Todo
 	db.Find(&todos)
 
 	setHeaders(w)
-	fmt.Println("Hello world", todos)
 	json.NewEncoder(w).Encode(todos)
 }
 
+// CreateTodo handler
+func CreateTodo(w http.ResponseWriter, r *http.Request) {
+	// connect()
+	// defer db.Close()
 
+	// vars := mux.Vars(r)
+	// title := vars["title"]
+	// category := vars["category"]
+	// isDone := vars["isDone"]
+
+	// db.Create(&Todo{Title: title, Category: category, IsDone: isDone})
+	// setHeaders(w)
+	vars := mux.Vars(r)
+	title := vars["title"]
+	fmt.Println(title)
+	// fmt.Fprintf(w, "TODO CREATED")
+}
 
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
 	myRouter.HandleFunc("/todos", GetTodos).Methods("GET")
-	// myRouter.HandleFunc("/user/{name}/{email}", NewUser).Methods("POST")
+	myRouter.HandleFunc("/create/{title}", CreateTodo).Methods("POST")
 	// myRouter.HandleFunc("/user/{name}", DeleteUser).Methods("DELETE")
 	// myRouter.HandleFunc("/user/{name}/{email}", UpdateUser).Methods("PUT")
 
 	fmt.Println("Server is running at port 3000")
 	log.Fatal(http.ListenAndServe(":3000", myRouter))
 }
-
 
 func main() {
 	InitialMigration()
