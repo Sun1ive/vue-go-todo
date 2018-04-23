@@ -1,36 +1,38 @@
 package main
 
 import (
+	"log"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 type Todo struct {
-	Title string `json:"title"`
+	Title    string `json:"title"`
 	Category string `json:"category"`
-	IsDone string `json:"isdone"`
+	IsDone   string `json:"isdone"`
 }
 
-func SetHeaders(w http.ResponseWriter)  {
+var todo Todo
+
+func SetHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
-func parseBody(w http.ResponseWriter, r *http.Request)  {
-	decoder := json.NewDecoder(r.Body)
-
-	var todo Todo
-	err := decoder.Decode(&todo)
-
+func parseBody(w http.ResponseWriter, r *http.Request) {
+	// Check for request Body
+	if r.Body == nil {
+		http.Error(w, "Please send body", 400)
+		return
+	}
+	// Decode todo
+	err := json.NewDecoder(r.Body).Decode(&todo)
 	if err != nil {
+		http.Error(w, err.Error(), 400)
 		panic(err)
 	}
 
-	fmt.Println(todo.Title)
-	fmt.Println(todo.Category)
-	fmt.Println(todo.IsDone)
-
-	output, err := json.Marshal(todo)
+	value, err := json.Marshal(todo)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -38,10 +40,12 @@ func parseBody(w http.ResponseWriter, r *http.Request)  {
 
 	SetHeaders(w)
 
-	w.Write(output)
+	w.Write(value)
+
+	fmt.Println(todo)
 }
 
-func main()  {
+func main() {
 	http.HandleFunc("/", parseBody)
-	http.ListenAndServe(":8081", nil)
+	log.Fatal(http.ListenAndServe(":8081", nil))
 }
