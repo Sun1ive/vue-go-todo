@@ -50,7 +50,9 @@
           <v-flex xs10 sm6 lg4>
             <v-card>
               <v-card-text>
-                <b class="mr-2">{{ i + 1 }}.</b><strong>{{ item }}</strong>
+                <h2>{{ i + 1 }}. Title: <s>{{ item.title }}</s></h2>
+                <h3><b>Completed:</b> {{ item.isdone }}</h3>
+                <h3><b>Category:</b> {{ item.category }}</h3>
                 <v-btn
                   flat
                   fab
@@ -77,10 +79,20 @@
 import Vue from 'vue';
 import api from './api/instance';
 
+interface Todos {
+  title: string;
+  category: string;
+  isDone: string;
+}
+
 export default Vue.extend({
   data: () => ({
     todo: '' as string,
-    todos: ['hellow', 'rowld', 'something', 'hellow1', 'rowld2'] as string[],
+    todos: [{
+      title: 'hello',
+      category: 'world',
+      isDone: 'false',
+    }] as Todos[],
     page: 1 as number,
     perPage: 5 as number,
     query: '' as string,
@@ -96,6 +108,9 @@ export default Vue.extend({
       return this.todos.slice().splice((this.perPage * this.page) - this.perPage, this.perPage);
     },
   },
+  created() {
+    this.fetch();
+  },
   methods: {
     async addTodo() {
       // api().post('/create', {});
@@ -105,6 +120,11 @@ export default Vue.extend({
     async removeTodo(index: number) {
       this.todos.splice(index, 1);
     },
+    async fetch() {
+      const { data } = await api().get('/todos');
+      console.log('---', data);
+      this.todos = data;
+    },
   },
 });
 </script>
@@ -113,6 +133,14 @@ export default Vue.extend({
 <style lang="stylus">
 #app
   font-family Roboto
+
+.card__text
+  position relative
+  .btn
+    position absolute
+    top 40%
+    right 10px
+    transform translateY(-50%)
 
 .card__title
   text-align center
