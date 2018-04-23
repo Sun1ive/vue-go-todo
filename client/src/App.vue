@@ -26,13 +26,16 @@
           </v-form>
         </v-flex>
       </v-layout>
+      <v-layout justify-center align-center>
+        <v-pagination :length="pLength" v-model="page" />
+      </v-layout>
       <transition-group
-        name="slide-fade"
+        name="list"
         tag="div"
         class="justify-center"
       >
         <v-layout
-          v-for="(item, i) in todos"
+          v-for="(item, i) in paginated"
           :key="i"
           justify-center
           align-center
@@ -58,13 +61,39 @@ import api from './api/instance';
 export default Vue.extend({
   data: () => ({
     todo: '' as string,
-    todos: ['hellow', 'rowld', 'something'] as string[],
+    todos: [
+      'hellow',
+      'rowld',
+      'something',
+      'hellow1',
+      'rowld2',
+      'something',
+      'hellow2',
+      'rowld3',
+      'something',
+      'hellow3',
+      'rowld5',
+      'something',
+      'hellow4',
+      'rowld6',
+      'something',
+    ] as string[],
+    page: 1 as number,
+    perPage: 10 as number,
   }),
   methods: {
     async addTodo() {
       // api().post('/create', {});
       this.todos.push(this.todo);
       this.todo = '';
+    },
+  },
+  computed: {
+    pLength(): number {
+      return Math.ceil(this.todos.length / this.perPage);
+    },
+    paginated(): string[] {
+      return this.todos.slice().splice((this.perPage * this.page) - this.perPage, this.perPage);
     },
   },
 });
