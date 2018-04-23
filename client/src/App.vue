@@ -29,6 +29,15 @@
       <v-layout justify-center align-center>
         <v-pagination :length="pLength" v-model="page" />
       </v-layout>
+      <v-layout justify-center align-center>
+        <v-flex xs10 sm6 lg4>
+          <v-text-field
+            v-model.lazy.trim="query"
+            prepend-icon="search"
+            label="Поиск"
+          />
+        </v-flex>
+      </v-layout>
       <transition-group
         name="list"
         tag="div"
@@ -61,25 +70,10 @@ import api from './api/instance';
 export default Vue.extend({
   data: () => ({
     todo: '' as string,
-    todos: [
-      'hellow',
-      'rowld',
-      'something',
-      'hellow1',
-      'rowld2',
-      'something',
-      'hellow2',
-      'rowld3',
-      'something',
-      'hellow3',
-      'rowld5',
-      'something',
-      'hellow4',
-      'rowld6',
-      'something',
-    ] as string[],
+    todos: ['hellow', 'rowld', 'something', 'hellow1', 'rowld2'] as string[],
     page: 1 as number,
     perPage: 10 as number,
+    query: '' as string,
   }),
   methods: {
     async addTodo() {
@@ -93,6 +87,9 @@ export default Vue.extend({
       return Math.ceil(this.todos.length / this.perPage);
     },
     paginated(): string[] {
+      if (this.query.length > 0) {
+        return this.todos.filter(todo => todo.toLowerCase().includes(this.query.toLowerCase()));
+      }
       return this.todos.slice().splice((this.perPage * this.page) - this.perPage, this.perPage);
     },
   },
