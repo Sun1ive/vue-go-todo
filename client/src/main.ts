@@ -1,12 +1,12 @@
 import Vue from 'vue';
-import App from './App.vue';
 import Vuetify from 'vuetify';
 import 'vuetify/dist/vuetify.css';
+import App from './App.vue';
 
 Vue.config.productionTip = false;
 Vue.use(Vuetify, {
   theme: {
-    primary: '#ff995e',
+    primary: '#1EB082',
   },
 });
 
