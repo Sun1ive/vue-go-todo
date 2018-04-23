@@ -12,9 +12,11 @@
         <v-flex xs10 sm6 lg4 class="text-xs-center">
           <v-form @submit.prevent="addTodo">
             <v-btn
-              dark
+              light
               color="primary"
+              class="white--text"
               type="submit"
+              :disabled="todo.length < 3"
             >Add Todo</v-btn>
             <v-text-field
               v-model.lazy.trim="todo"
@@ -25,7 +27,7 @@
         </v-flex>
       </v-layout>
       <transition-group
-        name="list"
+        name="slide-fade"
         tag="div"
         class="justify-center"
       >
@@ -62,6 +64,7 @@ export default Vue.extend({
     async addTodo() {
       // api().post('/create', {});
       this.todos.push(this.todo);
+      this.todo = '';
     },
   },
 });
@@ -86,6 +89,5 @@ export default Vue.extend({
 .list-enter, .list-leave-to
   opacity: 0;
   transform: translateY(30px);
-
 
 </style>
