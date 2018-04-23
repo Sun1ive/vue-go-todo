@@ -129,7 +129,7 @@ export default Vue.extend({
   },
   methods: {
     async addTodo() {
-      // api().post('/create', {});
+      // add new todo in db
       this.todos.push(this.todo);
       this.todo = {
         title: '',
@@ -139,6 +139,7 @@ export default Vue.extend({
     },
     async removeTodo(index: number) {
       this.todos.splice(index, 1);
+      // ajax request to delete todo in db
     },
     async fetch() {
       const { data } = await api().get('/todos');

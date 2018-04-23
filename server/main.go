@@ -1,122 +1,100 @@
-// package main
+package main
 
-// import (
-// 	"encoding/json"
-// 	"fmt"
-// 	"log"
-// 	"net/http"
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
 
-// 	"github.com/jinzhu/gorm"
-// 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-// )
+	"github.com/rs/cors"
 
-// // Todo Structure
-// type Todo struct {
-// 	gorm.Model
-// 	Title    string `json:"title"`
-// 	Category string `json:"category"`
-// 	IsDone   string `json:"isdone"`
-// }
+	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+)
 
-// /* Globals variables */
-// var db *gorm.DB
-// var err error
-// var todo Todo
+// Todo Structure
+type Todo struct {
+	gorm.Model
+	Title    string `json:"title"`
+	Category string `json:"category"`
+	IsDone   string `json:"isdone"`
+}
 
-// // connect to db
-// func connect() {
-// 	db, err = gorm.Open("sqlite3", "test.sqlite")
-// 	if err != nil {
-// 		panic("Failed to connect to database")
-// 	}
-// }
+/* Globals variables */
+var db *gorm.DB
+var err error
+var todo Todo
 
-// // InitialMigration for DB
-// func InitialMigration() {
-// 	connect()
-// 	db.AutoMigrate(&Todo{})
-// }
+// connect to db
+func connect() {
+	db, err = gorm.Open("sqlite3", "test.sqlite")
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+}
 
-// // SetHeaders handler
-// func SetHeaders(w http.ResponseWriter) {
-// 	w.Header().Set("Content-Type", "application/json")
-// }
+// InitialMigration for DB
+func InitialMigration() {
+	connect()
+	db.AutoMigrate(&Todo{})
+}
 
-// // GetTodos hanlder
-// func GetTodos(w http.ResponseWriter, r *http.Request) {
-// 	connect()
-// 	defer db.Close()
+// SetHeaders handler
+func SetHeaders(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+}
 
-// 	var todos []Todo
-// 	db.Find(&todos)
-// 	SetHeaders(w)
+// GetTodos handler
+func GetTodos(w http.ResponseWriter, r *http.Request) {
+	connect()
+	defer db.Close()
 
-// 	json.NewEncoder(w).Encode(todos)
-// }
+	var todos []Todo
+	db.Find(&todos)
+	SetHeaders(w)
 
-// // NewTodo handler
-// func NewTodo(w http.ResponseWriter, r *http.Request) {
-// 	connect()
-// 	defer db.Close()
-// 	// Check for request Body
-// 	if r.Body == nil {
-// 		http.Error(w, "Please send body", 400)
-// 		return
-// 	}
+	json.NewEncoder(w).Encode(todos)
+}
 
-// 	// decode r.Body
-// 	err := json.NewDecoder(r.Body).Decode(&todo)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), 400)
-// 		panic(err)
-// 	}
-// 	db.Create(&Todo{Title: todo.Title, Category: todo.Category, IsDone: todo.IsDone})
+// CreateTodo handler
+func CreateTodo(w http.ResponseWriter, r *http.Request) {
+	connect()
+	defer db.Close()
 
-// 	// encode to json
-// 	val, err := json.Marshal(todo)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), 500)
-// 		return
-// 	}
+	var newTodo Todo
+	decoder := json.NewDecoder(r.Body)
 
-// 	SetHeaders(w)
+	err := decoder.Decode(&newTodo)
+	if err != nil {
+		panic(err)
+	}
 
-// 	w.Write(val)
-// }
+	val := db.Create(&Todo{Title: newTodo.Title, Category: newTodo.Category, IsDone: newTodo.IsDone})
 
-// func parseBody(w http.ResponseWriter, r *http.Request) {
-// 	// Check for request Body
-// 	if r.Body == nil {
-// 		http.Error(w, "Please send body", 400)
-// 		return
-// 	}
-// 	// Decode todo
-// 	err := json.NewDecoder(r.Body).Decode(&todo)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), 400)
-// 		panic(err)
-// 	}
+	SetHeaders(w)
 
-// 	value, err := json.Marshal(todo)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), 500)
-// 		return
-// 	}
+	value, err := json.Marshal(val)
+	if err != nil {
+		panic(err)
+	}
 
-// 	SetHeaders(w)
+	w.Write(value)
 
-// 	w.Write(value)
+}
 
-// 	fmt.Println(todo)
-// }
+//Router
+func HandlerRequests() {
+	var Router = mux.NewRouter().StrictSlash(true)
 
-// func main() {
-// 	InitialMigration()
+	Router.HandleFunc("/todos", GetTodos).Methods("GET")
+	Router.HandleFunc("/create", CreateTodo)
 
-// 	http.HandleFunc("/", parseBody)
-// 	http.HandleFunc("/todos", GetTodos)
-// 	http.HandleFunc("/create", NewTodo)
+	log.Fatal(http.ListenAndServe(":8081", cors.Default().Handler(Router)))
+}
 
-// 	fmt.Println("Server is running at port 8081")
-// 	log.Fatal(http.ListenAndServe(":8081", nil))
-// }
+func main() {
+	fmt.Println("Server is running at port 8081")
+	InitialMigration()
+	HandlerRequests()
+}
