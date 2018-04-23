@@ -11,13 +11,6 @@
       <v-layout justify-center>
         <v-flex xs10 sm6 lg4 class="text-xs-center">
           <v-form @submit.prevent="addTodo">
-            <v-btn
-              :disabled="todo.length < 3"
-              light
-              color="primary"
-              class="white--text"
-              type="submit"
-            >Add Todo</v-btn>
             <v-text-field
               v-model.lazy.trim="todo.title"
               label="Todo Title"
@@ -34,6 +27,13 @@
               prepend-icon="done"
               label="Completed todo ?"
             />
+            <v-btn
+              :disabled="todo.length < 3"
+              light
+              color="primary"
+              class="white--text"
+              type="submit"
+            >Add Todo</v-btn>
           </v-form>
         </v-flex>
       </v-layout>
@@ -117,9 +117,9 @@ export default Vue.extend({
     pLength(): number {
       return Math.ceil(this.todos.length / this.perPage);
     },
-    paginated(): string[] {
+    paginated(): Todos[] {
       if (this.query.length > 0) {
-        return this.todos.filter(todo => todo.toLowerCase().includes(this.query.toLowerCase()));
+        return this.todos.filter(todo => todo.title.toLowerCase().includes(this.query.toLowerCase()));
       }
       return this.todos.slice().splice((this.perPage * this.page) - this.perPage, this.perPage);
     },
@@ -142,7 +142,6 @@ export default Vue.extend({
     },
     async fetch() {
       const { data } = await api().get('/todos');
-      console.log('---', data);
       this.todos = data;
     },
   },
