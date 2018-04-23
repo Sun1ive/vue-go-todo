@@ -54,6 +54,36 @@ func GetTodos(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(todos)
 }
 
+// NewTodo handler
+func NewTodo(w http.ResponseWriter, r *http.Request) {
+	connect()
+	defer db.Close()
+	// Check for request Body
+	if r.Body == nil {
+		http.Error(w, "Please send body", 400)
+		return
+	}
+
+	// decode r.Body
+	err := json.NewDecoder(r.Body).Decode(&todo)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		panic(err)
+	}
+	db.Create(&Todo{Title: todo.Title, Category: todo.Category, IsDone: todo.IsDone})
+
+	// encode to json
+	val, err := json.Marshal(todo)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	SetHeaders(w)
+
+	w.Write(val)
+}
+
 func parseBody(w http.ResponseWriter, r *http.Request) {
 	// Check for request Body
 	if r.Body == nil {
@@ -85,6 +115,7 @@ func main() {
 
 	http.HandleFunc("/", parseBody)
 	http.HandleFunc("/todos", GetTodos)
+	http.HandleFunc("/create", NewTodo)
 
 	fmt.Println("Server is running at port 8081")
 	log.Fatal(http.ListenAndServe(":8081", nil))
