@@ -83,12 +83,35 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//Router
+// DeleteTodo handler
+func DeleteTodo(w http.ResponseWriter, r *http.Request)  {
+	connect()
+	defer db.Close()
+
+	var todo Todo
+	decoder := json.NewDecoder(r.Body)
+
+	err := decoder.Decode(&todo)
+
+	if err != nil {
+		panic(err)
+	}
+	
+	db.Where("ID = ?", todo.ID).Find(&todo)
+	db.Delete(&todo)
+
+	SetHeaders(w)
+	
+	fmt.Fprintf(w, "Deleted")
+}
+
+// HandlerRequests router function
 func HandlerRequests() {
 	var Router = mux.NewRouter().StrictSlash(true)
 
 	Router.HandleFunc("/todos", GetTodos).Methods("GET")
-	Router.HandleFunc("/create", CreateTodo)
+	Router.HandleFunc("/create", CreateTodo).Methods("POST")
+	Router.HandleFunc("/delete", DeleteTodo).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8081", cors.Default().Handler(Router)))
 }
