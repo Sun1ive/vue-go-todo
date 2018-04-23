@@ -15,4 +15,11 @@ describe('App.vue', () => {
     });
     expect(wrapper).not.toBe(null);
   });
+
+  it('Should render without crash', () => {
+    const wrapper = shallow(App, {
+      localVue,
+    });
+    expect(wrapper).toBeInstanceOf(Object);
+  });
 });
