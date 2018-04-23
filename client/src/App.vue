@@ -19,9 +19,20 @@
               type="submit"
             >Add Todo</v-btn>
             <v-text-field
-              v-model.lazy.trim="todo"
-              label="Todo"
-              append-icon="add"
+              v-model.lazy.trim="todo.title"
+              label="Todo Title"
+              prepend-icon="bookmark"
+            />
+            <v-text-field
+              v-model.lazy.trim="todo.category"
+              label="Todo Category"
+              prepend-icon="list"
+            />
+            <v-select
+              :items="['true', 'false']"
+              v-model="todo.isDone"
+              prepend-icon="done"
+              label="Completed todo ?"
             />
           </v-form>
         </v-flex>
@@ -50,7 +61,8 @@
           <v-flex xs10 sm6 lg4>
             <v-card>
               <v-card-text>
-                <h2>{{ i + 1 }}. Title: <s>{{ item.title }}</s></h2>
+                <h2 v-if="item.isdone === 'false'">{{ i + 1 }}. Title: {{ item.title }}</h2>
+                <h2 v-else>{{ i + 1 }}. Title: <s>{{ item.title }}</s></h2>
                 <h3><b>Completed:</b> {{ item.isdone }}</h3>
                 <h3><b>Category:</b> {{ item.category }}</h3>
                 <v-btn
@@ -87,7 +99,11 @@ interface Todos {
 
 export default Vue.extend({
   data: () => ({
-    todo: '' as string,
+    todo: {
+      title: '',
+      category: '',
+      isDone: '',
+    } as Todos,
     todos: [{
       title: 'hello',
       category: 'world',
@@ -115,7 +131,11 @@ export default Vue.extend({
     async addTodo() {
       // api().post('/create', {});
       this.todos.push(this.todo);
-      this.todo = '';
+      this.todo = {
+        title: '',
+        category: '',
+        isDone: '',
+      };
     },
     async removeTodo(index: number) {
       this.todos.splice(index, 1);
