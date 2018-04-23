@@ -18,7 +18,7 @@ type Todo struct {
 	gorm.Model
 	Title    string `json:"title"`
 	Category string `json:"category"`
-	IsDone   string `json:"isdone"`
+	IsDone   string `json:"isDone"`
 }
 
 /* Globals variables */
@@ -113,7 +113,7 @@ func HandlerRequests() {
 	Router.HandleFunc("/create", CreateTodo).Methods("POST")
 	Router.HandleFunc("/delete", DeleteTodo).Methods("DELETE")
 
-	log.Fatal(http.ListenAndServe(":8081", cors.Default().Handler(Router)))
+	log.Fatal(http.ListenAndServe(":8081", cors.AllowAll().Handler(Router)))
 }
 
 func main() {
