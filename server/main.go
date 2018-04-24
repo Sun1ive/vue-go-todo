@@ -105,6 +105,27 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request)  {
 	fmt.Fprintf(w, "Deleted")
 }
 
+func UpdateTodo(w http.ResponseWriter,r *http.Request) {
+	connect()
+	defer db.Close()
+
+	vars:= mux.Vars(r)
+	id := vars["id"]
+	isDone := vars["isDone"]
+
+	var todo Todo
+
+	db.Where("ID = ?", id).Find(&todo)
+
+	todo.IsDone = isDone
+
+	db.Save(&todo)
+
+	SetHeaders(w)
+
+	fmt.Fprint(w, "Successfully updated")
+}
+
 // HandlerRequests router function
 func HandlerRequests() {
 	var Router = mux.NewRouter().StrictSlash(true)
@@ -112,6 +133,7 @@ func HandlerRequests() {
 	Router.HandleFunc("/todos", GetTodos).Methods("GET")
 	Router.HandleFunc("/create", CreateTodo).Methods("POST")
 	Router.HandleFunc("/delete", DeleteTodo).Methods("DELETE")
+	Router.HandleFunc("/update/id={id}&completed={isDone}", UpdateTodo).Methods("PUT")
 
 	log.Fatal(http.ListenAndServe(":8081", cors.AllowAll().Handler(Router)))
 }
